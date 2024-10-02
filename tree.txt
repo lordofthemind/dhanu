@@ -1,0 +1,17 @@
+.
+├── Changelog.md
+├── LICENSE
+├── Makefile
+├── Plan.md
+├── Readme.md
+├── cmd
+│   └── root.go
+├── config.yaml
+├── go.mod
+├── go.sum
+├── main.go
+├── tmp
+│   └── main
+└── tree.txt
+
+3 directories, 12 files
