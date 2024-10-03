@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Function to save the configuration to the file
+// SaveConfig saves the configuration to the specified file path
 func SaveConfig(config Config, configPath string) error {
 	viper.Set("smtp.host", config.SMTP.Host)
 	viper.Set("smtp.port", config.SMTP.Port)

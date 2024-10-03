@@ -19,8 +19,8 @@ type Config struct {
 	DefaultRecipient string `mapstructure:"default_recipient"`
 }
 
-// Function to load the configuration and create the file if it doesn't exist
-func LoadConfig() (Config, error) {
+// LoadConfig loads the configuration and returns the config and the path
+func LoadConfig() (Config, string, error) {
 	var config Config
 
 	// Determine the OS and set the default config path
@@ -30,7 +30,7 @@ func LoadConfig() (Config, error) {
 	} else {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			return config, err
+			return config, "", err
 		}
 
 		// Set config path based on the OS
@@ -41,7 +41,7 @@ func LoadConfig() (Config, error) {
 		}
 	}
 
-	// Check if config file exists
+	// Check if config file exists, if not, create a new one
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		fmt.Println("Configuration file not found, creating a new one...")
 
@@ -52,9 +52,9 @@ func LoadConfig() (Config, error) {
 		config.SMTP.Password = "your_password"
 		config.DefaultRecipient = "your-email@example.com"
 
-		// Save the config to file
+		// Save the default config to file
 		if err := SaveConfig(config, configPath); err != nil {
-			return config, err
+			return config, "", err
 		}
 
 		fmt.Println("Default configuration file created at:", configPath)
@@ -63,13 +63,13 @@ func LoadConfig() (Config, error) {
 	// Load the config file using Viper
 	viper.SetConfigFile(configPath)
 	if err := viper.ReadInConfig(); err != nil {
-		return config, err
+		return config, "", err
 	}
 
 	// Unmarshal the config into the Config struct
 	if err := viper.Unmarshal(&config); err != nil {
-		return config, err
+		return config, "", err
 	}
 
-	return config, nil
+	return config, configPath, nil
 }

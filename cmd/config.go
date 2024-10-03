@@ -11,9 +11,15 @@ import (
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Update configuration settings",
-	Long: `Use this command to update your configuration settings, for example:
+	Long: `Use these commands to update your configuration settings, for example:
 
-dhanu config --username your_username`,
+dhanu config --port 465
+dhanu config --host smtp.yahoo.com
+dhanu config --username your_username
+dhanu config --password your_app_password
+dhanu config --default-recipient my-email@example.com
+dhanu config --username my_username --password my_password --host smtp.gmail.com --port 465 --default-recipient my-email@example.com`,
+
 	Run: func(cmd *cobra.Command, args []string) {
 		updateConfig(cmd) // Pass the cmd object here
 	},
@@ -23,16 +29,18 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 
 	// Define flags for updating configuration
+	configCmd.Flags().IntP("port", "P", 0, "SMTP port")
+	configCmd.Flags().StringP("host", "H", "", "SMTP host")
 	configCmd.Flags().StringP("username", "u", "", "SMTP username")
 	configCmd.Flags().StringP("password", "p", "", "SMTP password")
-	configCmd.Flags().StringP("host", "H", "", "SMTP host")
-	configCmd.Flags().IntP("port", "P", 0, "SMTP port")
+	configCmd.Flags().StringP("default-recipient", "d", "", "Default recipient email")
+
 }
 
 // Function to update the configuration
 func updateConfig(cmd *cobra.Command) {
 	// Load existing config
-	config, err := configs.LoadConfig()
+	config, configPath, err := configs.LoadConfig()
 	if err != nil {
 		fmt.Println("Error loading configuration:", err)
 		return
@@ -51,9 +59,12 @@ func updateConfig(cmd *cobra.Command) {
 	if port, _ := cmd.Flags().GetInt("port"); port != 0 {
 		config.SMTP.Port = port
 	}
+	if recipient, _ := cmd.Flags().GetString("default-recipient"); recipient != "" {
+		config.DefaultRecipient = recipient
+	}
 
 	// Save updated configuration
-	err = configs.SaveConfig(config)
+	err = configs.SaveConfig(config, configPath)
 	if err != nil {
 		fmt.Println("Error saving configuration:", err)
 		return
