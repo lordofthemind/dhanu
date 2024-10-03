@@ -4,14 +4,26 @@
 ├── Makefile
 ├── Plan.md
 ├── Readme.md
+├── Roadmap.md
+├── Structure.md
+├── bin
 ├── cmd
-│   └── root.go
+│   ├── root.go
+│   └── send.go
 ├── config.yaml
+├── docs
+├── examples
 ├── go.mod
 ├── go.sum
+├── internals
+│   ├── infrastructure
+│   ├── services
+│   └── utils
 ├── main.go
+├── pkgs
+│   └── configs
 ├── tmp
 │   └── main
 └── tree.txt
 
-3 directories, 12 files
+12 directories, 15 files
