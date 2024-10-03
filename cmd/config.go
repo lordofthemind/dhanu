@@ -26,6 +26,7 @@ dhanu config --username my_username --password my_password --host smtp.gmail.com
 }
 
 func init() {
+
 	rootCmd.AddCommand(configCmd)
 
 	// Define flags for updating configuration

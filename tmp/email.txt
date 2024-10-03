@@ -1,20 +1,24 @@
-Hi [Recipient's Name],
 
-I hope you're doing well! I wanted to take a moment to share some exciting news with you. After months of planning and hard work, we are thrilled to announce the launch of our new project, [Project Name].
+the subject will be optional for all scenario, if provided will be used otherwise current unix time stamp should be used as subject
 
-This project is designed to [insert brief project description—what it does, who it’s for, etc.]. We believe it will make a meaningful impact by [mention the specific benefits or goals].
+for email body we will have option of either text directly or through only txt file
 
-Here are a few things you can expect:
+recipient we have a default reciepient if not provided use default reciepient if provided use it
 
-[Feature or Benefit 1]
-[Feature or Benefit 2]
-[Feature or Benefit 3]
-We'd love for you to check it out at [Website Link] and share any feedback you might have. If you have any questions or want to learn more, feel free to reach out!
+if a folder is passed as attachment then zip it so it can be sent easily
 
-Thank you for your ongoing support, and we can't wait for you to experience [Project Name].
+adhere to these limitations with proper validations
 
-Best regards,
-[Your Name]
-[Your Position]
-[Company Name]
-[Contact Info]
+Here are the limits for Gmail:
+
+Attachment Size Limit:
+
+Gmail allows up to 25 MB per email, including attachments.
+If you need to send files larger than 25 MB, Gmail will automatically upload the file to Google Drive and insert a link to the file in the email.
+Word Limit in Email Body:
+
+Gmail does not have a strict word limit for the email body, but the total email size (including attachments, text, formatting, and metadata) is limited to 25 MB. The email body would need to remain within this total size.
+Subject Line Limit:
+
+The subject line is limited to 78 characters. While this is not strictly a word limit, it effectively limits how much you can write in the subject.
+Would you like to know more about these limits or how to handle large attachments?
