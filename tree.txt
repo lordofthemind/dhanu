@@ -26,7 +26,8 @@
 │       ├── LoadSendConfigs.go
 │       └── SaveConfigs.go
 ├── tmp
+│   ├── email.txt
 │   └── main
 └── tree.txt
 
-12 directories, 18 files
+12 directories, 19 files
