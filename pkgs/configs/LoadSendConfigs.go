@@ -1,7 +1,7 @@
-// pkgs/configs/load.go
 package configs
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -16,8 +16,10 @@ type Config struct {
 		Username string `mapstructure:"username"`
 		Password string `mapstructure:"password"`
 	} `mapstructure:"smtp"`
+	DefaultRecipient string `mapstructure:"default_recipient"`
 }
 
+// Function to load the configuration and create the file if it doesn't exist
 func LoadConfig() (Config, error) {
 	var config Config
 
@@ -39,12 +41,32 @@ func LoadConfig() (Config, error) {
 		}
 	}
 
-	viper.SetConfigFile(configPath) // Use the config file path
+	// Check if config file exists
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		fmt.Println("Configuration file not found, creating a new one...")
 
+		// Set default values
+		config.SMTP.Host = "smtp.example.com"
+		config.SMTP.Port = 587
+		config.SMTP.Username = "your_username"
+		config.SMTP.Password = "your_password"
+		config.DefaultRecipient = "your-email@example.com"
+
+		// Save the config to file
+		if err := SaveConfig(config, configPath); err != nil {
+			return config, err
+		}
+
+		fmt.Println("Default configuration file created at:", configPath)
+	}
+
+	// Load the config file using Viper
+	viper.SetConfigFile(configPath)
 	if err := viper.ReadInConfig(); err != nil {
 		return config, err
 	}
 
+	// Unmarshal the config into the Config struct
 	if err := viper.Unmarshal(&config); err != nil {
 		return config, err
 	}

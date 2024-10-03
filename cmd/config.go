@@ -1,40 +1,63 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
 	"fmt"
 
+	"github.com/lordofthemind/dhanu/pkgs/configs"
 	"github.com/spf13/cobra"
 )
 
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Update configuration settings",
+	Long: `Use this command to update your configuration settings, for example:
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+dhanu config --username your_username`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("config called")
+		updateConfig(cmd) // Pass the cmd object here
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(configCmd)
 
-	// Here you will define your flags and configuration settings.
+	// Define flags for updating configuration
+	configCmd.Flags().StringP("username", "u", "", "SMTP username")
+	configCmd.Flags().StringP("password", "p", "", "SMTP password")
+	configCmd.Flags().StringP("host", "H", "", "SMTP host")
+	configCmd.Flags().IntP("port", "P", 0, "SMTP port")
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// configCmd.PersistentFlags().String("foo", "", "A help for foo")
+// Function to update the configuration
+func updateConfig(cmd *cobra.Command) {
+	// Load existing config
+	config, err := configs.LoadConfig()
+	if err != nil {
+		fmt.Println("Error loading configuration:", err)
+		return
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// configCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// Update fields based on flags
+	if username, _ := cmd.Flags().GetString("username"); username != "" {
+		config.SMTP.Username = username
+	}
+	if password, _ := cmd.Flags().GetString("password"); password != "" {
+		config.SMTP.Password = password
+	}
+	if host, _ := cmd.Flags().GetString("host"); host != "" {
+		config.SMTP.Host = host
+	}
+	if port, _ := cmd.Flags().GetInt("port"); port != 0 {
+		config.SMTP.Port = port
+	}
+
+	// Save updated configuration
+	err = configs.SaveConfig(config)
+	if err != nil {
+		fmt.Println("Error saving configuration:", err)
+		return
+	}
+
+	fmt.Println("Configuration updated successfully.")
 }

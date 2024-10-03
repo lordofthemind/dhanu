@@ -8,6 +8,7 @@
 ├── Structure.md
 ├── bin
 ├── cmd
+│   ├── config.go
 │   ├── root.go
 │   └── send.go
 ├── config.yaml
@@ -22,8 +23,10 @@
 ├── main.go
 ├── pkgs
 │   └── configs
+│       ├── LoadSendConfigs.go
+│       └── SaveConfigs.go
 ├── tmp
 │   └── main
 └── tree.txt
 
-12 directories, 15 files
+12 directories, 18 files
