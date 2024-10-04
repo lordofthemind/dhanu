@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/lordofthemind/dhanu/internals/utils"
 	"github.com/lordofthemind/dhanu/pkgs/configs"
 	"github.com/spf13/cobra"
 )
@@ -59,10 +60,18 @@ func initiateSetup(config *configs.Config, configPath string) {
 
 	fmt.Println("Initial setup required. Please provide the following details:")
 
-	// Prompt for each field and read user input
-	fmt.Print("From Email (the email from which the emails will be sent): ")
-	config.SMTP.FromEmail, _ = reader.ReadString('\n')
-	config.SMTP.FromEmail = strings.TrimSpace(config.SMTP.FromEmail)
+	// Prompt for From Email with validation
+	for {
+		fmt.Print("From Email (the email from which the emails will be sent): ")
+		config.SMTP.FromEmail, _ = reader.ReadString('\n')
+		config.SMTP.FromEmail = strings.TrimSpace(config.SMTP.FromEmail)
+
+		if utils.IsValidEmail(config.SMTP.FromEmail) {
+			break
+		} else {
+			fmt.Println("Invalid email format. Please enter a valid email address.")
+		}
+	}
 
 	fmt.Print("Credential (the app password of the above-provided email): ")
 	config.SMTP.Credentials, _ = reader.ReadString('\n')
@@ -87,9 +96,18 @@ func initiateSetup(config *configs.Config, configPath string) {
 	config.SMTP.Host, _ = reader.ReadString('\n')
 	config.SMTP.Host = strings.TrimSpace(config.SMTP.Host)
 
-	fmt.Print("Default Recipient (this email address will be used as the default recipient if none is provided): ")
-	config.DefaultRecipient, _ = reader.ReadString('\n')
-	config.DefaultRecipient = strings.TrimSpace(config.DefaultRecipient)
+	// Prompt for Default Recipient with validation
+	for {
+		fmt.Print("Default Recipient (this email address will be used as the default recipient if none is provided): ")
+		config.DefaultRecipient, _ = reader.ReadString('\n')
+		config.DefaultRecipient = strings.TrimSpace(config.DefaultRecipient)
+
+		if utils.IsValidEmail(config.DefaultRecipient) {
+			break
+		} else {
+			fmt.Println("Invalid email format. Please enter a valid email address.")
+		}
+	}
 
 	// Confirmation prompt
 	for {
@@ -117,9 +135,18 @@ func initiateSetup(config *configs.Config, configPath string) {
 		} else if confirmation == "n" {
 			// Re-enter the details if the user chooses 'n'
 			fmt.Println("Let's re-enter the details.")
-			fmt.Print("From Email: ")
-			config.SMTP.FromEmail, _ = reader.ReadString('\n')
-			config.SMTP.FromEmail = strings.TrimSpace(config.SMTP.FromEmail)
+			// Prompt for From Email with validation
+			for {
+				fmt.Print("From Email: ")
+				config.SMTP.FromEmail, _ = reader.ReadString('\n')
+				config.SMTP.FromEmail = strings.TrimSpace(config.SMTP.FromEmail)
+
+				if utils.IsValidEmail(config.SMTP.FromEmail) {
+					break
+				} else {
+					fmt.Println("Invalid email format. Please enter a valid email address.")
+				}
+			}
 
 			fmt.Print("Credential: ")
 			config.SMTP.Credentials, _ = reader.ReadString('\n')
@@ -143,9 +170,18 @@ func initiateSetup(config *configs.Config, configPath string) {
 			config.SMTP.Host, _ = reader.ReadString('\n')
 			config.SMTP.Host = strings.TrimSpace(config.SMTP.Host)
 
-			fmt.Print("Default Recipient: ")
-			config.DefaultRecipient, _ = reader.ReadString('\n')
-			config.DefaultRecipient = strings.TrimSpace(config.DefaultRecipient)
+			// Prompt for Default Recipient with validation
+			for {
+				fmt.Print("Default Recipient: ")
+				config.DefaultRecipient, _ = reader.ReadString('\n')
+				config.DefaultRecipient = strings.TrimSpace(config.DefaultRecipient)
+
+				if utils.IsValidEmail(config.DefaultRecipient) {
+					break
+				} else {
+					fmt.Println("Invalid email format. Please enter a valid email address.")
+				}
+			}
 		} else {
 			fmt.Println("Invalid option. Please type 'y' for yes or 'n' for no.")
 		}
