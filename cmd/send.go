@@ -150,20 +150,23 @@ func sendEmail(cmd *cobra.Command) {
 		config.SMTP.Credentials,
 	)
 
-	// Send the email with CC and BCC recipients
-	err = emailService.SendEmailWithCCAndBCC([]string{to}, cc, bcc, subject, body, false)
+	// Determine the sending method based on the presence of CC/BCC and attachments
+	if len(cc) == 0 && len(bcc) == 0 {
+		// If no CC or BCC, send email without them
+		if len(finalAttachments) > 0 {
+			err = emailService.SendEmailWithAttachments([]string{to}, subject, body, finalAttachments, false)
+		} else {
+			err = emailService.SendEmail([]string{to}, subject, body, false)
+		}
+	} else {
+		// If CC or BCC is provided, use them in the sending method
+		err = emailService.SendEmailWithCCAndBCC([]string{to}, cc, bcc, subject, body, false)
+	}
+
+	// Handle sending errors
 	if err != nil {
 		log.Printf("Error sending email: %v\n", err)
 		return
-	}
-
-	// Send the email with attachments if provided
-	if len(finalAttachments) > 0 {
-		err = emailService.SendEmailWithAttachments([]string{to}, subject, body, finalAttachments, false)
-		if err != nil {
-			log.Printf("Error sending email with attachments: %v\n", err)
-			return
-		}
 	}
 
 	log.Println("Email sent successfully.")
