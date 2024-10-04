@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/lordofthemind/dhanu/pkgs/configs"
 	"github.com/spf13/cobra"
@@ -13,12 +16,12 @@ var configCmd = &cobra.Command{
 	Short: "Update configuration settings",
 	Long: `Use these commands to update your configuration settings, for example:
 
-dhanu config --port 465
-dhanu config --host smtp.yahoo.com
-dhanu config --from-email your_email@example.com
-dhanu config --credentials your_app_password
-dhanu config --default-recipient my-email@example.com
-dhanu config --from-email my_email@example.com --credentials my_password --host smtp.gmail.com --port 465 --default-recipient my-email@example.com`,
+dhanu config -P, --port 465
+dhanu config -H, --host smtp.yahoo.com
+dhanu config -F, --from-email your_email@example.com
+dhanu config -C, --credentials your_app_password
+dhanu config -D, --default-recipient my-email@example.com
+dhanu config -F my_email@example.com -C my_password -H smtp.gmail.com -P 465 -D my-email@example.com`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		updateConfig(cmd)
@@ -45,24 +48,75 @@ func updateConfig(cmd *cobra.Command) {
 		return
 	}
 
+	reader := bufio.NewReader(os.Stdin)
+
 	// First time setup for credentials
-	if config.SetupCompleted {
-		fmt.Println("Initial setup required. Please provide following details.")
+	if !config.SetupCompleted {
+		fmt.Println("Initial setup required. Please provide the following details:")
+
+		// Prompt for each field and read user input
 		fmt.Print("From Email (the email from which the emails will be sent): ")
-		fmt.Scanln(&config.SMTP.FromEmail)
-		fmt.Print("Credential (app password of the above provided email): ")
-		fmt.Scanln(&config.SMTP.Credentials)
-		fmt.Print("Port (the port number which will be use by smtp of the above provided email): ")
+		config.SMTP.FromEmail, _ = reader.ReadString('\n')
+		config.SMTP.FromEmail = strings.TrimSpace(config.SMTP.FromEmail)
+
+		fmt.Print("Credential (the app password of the above-provided email): ")
+		config.SMTP.Credentials, _ = reader.ReadString('\n')
+		config.SMTP.Credentials = strings.TrimSpace(config.SMTP.Credentials)
+
+		fmt.Print("Port (the port number to be used by SMTP for the above email): ")
 		fmt.Scanln(&config.SMTP.Port)
-		fmt.Print("Host (the host of the above provided email): ")
-		fmt.Scanln(&config.SMTP.Host)
-		fmt.Print("Default recipient (this email address will be used as default reciepient in case no reciepient provided): ")
-		fmt.Scanln(&config.SMTP.Credentials)
-		fmt.Print("Confirm the details above or you want to try again, y or no: ")
-		// put condition here
+
+		fmt.Print("Host (the SMTP host for the above-provided email): ")
+		config.SMTP.Host, _ = reader.ReadString('\n')
+		config.SMTP.Host = strings.TrimSpace(config.SMTP.Host)
+
+		fmt.Print("Default Recipient (this email address will be used as the default recipient if none is provided): ")
+		config.DefaultRecipient, _ = reader.ReadString('\n')
+		config.DefaultRecipient = strings.TrimSpace(config.DefaultRecipient)
+
+		// Confirmation prompt
+		for {
+			fmt.Println("\nPlease confirm the details you entered:")
+			fmt.Printf("From Email: %s\n", config.SMTP.FromEmail)
+			fmt.Printf("Credential: %s\n", config.SMTP.Credentials)
+			fmt.Printf("Port: %d\n", config.SMTP.Port)
+			fmt.Printf("Host: %s\n", config.SMTP.Host)
+			fmt.Printf("Default Recipient: %s\n", config.DefaultRecipient)
+			fmt.Print("Are these details correct? (y/n): ")
+
+			confirmation, _ := reader.ReadString('\n')
+			confirmation = strings.TrimSpace(strings.ToLower(confirmation))
+
+			if confirmation == "y" {
+				config.SetupCompleted = true
+				break
+			} else if confirmation == "n" {
+				fmt.Println("Let's re-enter the details.")
+				fmt.Print("From Email: ")
+				config.SMTP.FromEmail, _ = reader.ReadString('\n')
+				config.SMTP.FromEmail = strings.TrimSpace(config.SMTP.FromEmail)
+
+				fmt.Print("Credential: ")
+				config.SMTP.Credentials, _ = reader.ReadString('\n')
+				config.SMTP.Credentials = strings.TrimSpace(config.SMTP.Credentials)
+
+				fmt.Print("Port: ")
+				fmt.Scanln(&config.SMTP.Port)
+
+				fmt.Print("Host: ")
+				config.SMTP.Host, _ = reader.ReadString('\n')
+				config.SMTP.Host = strings.TrimSpace(config.SMTP.Host)
+
+				fmt.Print("Default Recipient: ")
+				config.DefaultRecipient, _ = reader.ReadString('\n')
+				config.DefaultRecipient = strings.TrimSpace(config.DefaultRecipient)
+			} else {
+				fmt.Println("Invalid option. Please type 'y' for yes or 'n' for no.")
+			}
+		}
 	}
 
-	// Update fields based on flags
+	// Update fields based on flags if provided
 	if fromEmail, _ := cmd.Flags().GetString("from-email"); fromEmail != "" {
 		config.SMTP.FromEmail = fromEmail
 	}
