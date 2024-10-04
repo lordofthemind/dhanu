@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/lordofthemind/dhanu/internals/utils"
 	"github.com/lordofthemind/dhanu/pkgs/configs"
 	"github.com/lordofthemind/mygopher/gophersmtp"
 	"github.com/spf13/cobra"
@@ -17,16 +18,15 @@ import (
 // sendCmd represents the send command
 var sendCmd = &cobra.Command{
 	Use:   "send",
-	Short: "Send an email with optional attachments",
-	Long: `Send an email to a recipient with a subject and body. You can specify 
-a recipient, subject, body text, or body file, and attach files or folders to the email.`,
+	Short: "Send an email with optional attachments, CC, and BCC",
+	Long: `Send an email to a recipient with a subject, body, CC, and BCC. 
+You can also specify attachments or folders to zip and attach.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		sendEmail(cmd)
 	},
 }
 
 func init() {
-
 	rootCmd.AddCommand(sendCmd)
 
 	// Define flags for sending email
@@ -35,10 +35,18 @@ func init() {
 	sendCmd.Flags().StringP("body", "b", "", "Email body text")
 	sendCmd.Flags().StringP("body-file", "f", "", "Path to text file for email body")
 	sendCmd.Flags().StringSliceP("attachments", "a", []string{}, "List of file paths or folders to attach to the email")
+	sendCmd.Flags().StringSliceP("cc", "C", []string{}, "List of CC recipients")   // Uppercase C for CC
+	sendCmd.Flags().StringSliceP("bcc", "B", []string{}, "List of BCC recipients") // Uppercase B for BCC
 }
 
-// Function to send an email
 func sendEmail(cmd *cobra.Command) {
+	// Check if any flags were provided
+	if cmd.Flags().NFlag() == 0 {
+		// Show help and return if no flags are passed
+		_ = cmd.Help()
+		return
+	}
+
 	// Load configuration to get default recipient
 	config, _, err := configs.LoadConfig()
 	if err != nil {
@@ -56,10 +64,28 @@ func sendEmail(cmd *cobra.Command) {
 		return
 	}
 
+	// Validate the recipient email
+	if !utils.IsValidEmail(to) {
+		log.Println("Error: Invalid recipient email address.")
+		return
+	}
+
+	// Get CC and BCC recipients from flags
+	cc, _ := cmd.Flags().GetStringSlice("cc")
+	bcc, _ := cmd.Flags().GetStringSlice("bcc")
+
+	// Validate CC and BCC emails
+	for _, email := range append(cc, bcc...) {
+		if !utils.IsValidEmail(email) {
+			log.Printf("Error: Invalid email address in CC or BCC: %s\n", email)
+			return
+		}
+	}
+
 	// Get the subject from the flag or use the current Unix timestamp as the subject
 	subject, _ := cmd.Flags().GetString("subject")
 	if subject == "" {
-		subject = fmt.Sprintf("Email sent at %d", time.Now().Unix())
+		subject = fmt.Sprintf("Email sent at %s", time.Now().Format(time.RFC1123))
 	} else if len(subject) > 78 {
 		log.Println("Error: Subject exceeds 78 character limit.")
 		return
@@ -124,17 +150,20 @@ func sendEmail(cmd *cobra.Command) {
 		config.SMTP.Credentials,
 	)
 
-	// Send the email (without or with attachments)
-	if len(finalAttachments) == 0 {
-		err = emailService.SendEmail([]string{to}, subject, body, false)
-	} else {
-		err = emailService.SendEmailWithAttachments([]string{to}, subject, body, finalAttachments, false)
-	}
-
-	// Handle sending errors
+	// Send the email with CC and BCC recipients
+	err = emailService.SendEmailWithCCAndBCC([]string{to}, cc, bcc, subject, body, false)
 	if err != nil {
 		log.Printf("Error sending email: %v\n", err)
 		return
+	}
+
+	// Send the email with attachments if provided
+	if len(finalAttachments) > 0 {
+		err = emailService.SendEmailWithAttachments([]string{to}, subject, body, finalAttachments, false)
+		if err != nil {
+			log.Printf("Error sending email with attachments: %v\n", err)
+			return
+		}
 	}
 
 	log.Println("Email sent successfully.")
