@@ -120,8 +120,8 @@ func sendEmail(cmd *cobra.Command) {
 	emailService := gophersmtp.NewEmailService(
 		config.SMTP.Host,
 		fmt.Sprintf("%d", config.SMTP.Port),
-		config.SMTP.Username,
-		config.SMTP.Password,
+		config.SMTP.FromEmail,
+		config.SMTP.Credentials,
 	)
 
 	// Send the email (without or with attachments)

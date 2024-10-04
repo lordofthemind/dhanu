@@ -11,12 +11,13 @@ import (
 
 type Config struct {
 	SMTP struct {
-		Host     string `mapstructure:"host"`
-		Port     int    `mapstructure:"port"`
-		Username string `mapstructure:"username"`
-		Password string `mapstructure:"password"`
+		Host        string `mapstructure:"host"`
+		Port        int    `mapstructure:"port"`
+		FromEmail   string `mapstructure:"from_email"`  // Updated from Username to FromEmail
+		Credentials string `mapstructure:"credentials"` // Updated from Password to Credentials
 	} `mapstructure:"smtp"`
 	DefaultRecipient string `mapstructure:"default_recipient"`
+	SetupCompleted   bool   `mapstructure:"setup_completed"` // New field to track if setup is completed
 }
 
 // LoadConfig loads the configuration and returns the config and the path
@@ -46,11 +47,12 @@ func LoadConfig() (Config, string, error) {
 		fmt.Println("Configuration file not found, creating a new one...")
 
 		// Set default values
-		config.SMTP.Host = "smtp.example.com"
-		config.SMTP.Port = 587
-		config.SMTP.Username = "your_username"
-		config.SMTP.Password = "your_password"
-		config.DefaultRecipient = "your-email@example.com"
+		config.SMTP.Host = ""
+		config.SMTP.Port = 0
+		config.SMTP.FromEmail = ""
+		config.SMTP.Credentials = ""
+		config.DefaultRecipient = ""
+		config.SetupCompleted = false // Mark setup as incomplete
 
 		// Save the default config to file
 		if err := SaveConfig(config, configPath); err != nil {

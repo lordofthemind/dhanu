@@ -11,9 +11,10 @@ import (
 func SaveConfig(config Config, configPath string) error {
 	viper.Set("smtp.host", config.SMTP.Host)
 	viper.Set("smtp.port", config.SMTP.Port)
-	viper.Set("smtp.username", config.SMTP.Username)
-	viper.Set("smtp.password", config.SMTP.Password)
+	viper.Set("smtp.from_email", config.SMTP.FromEmail)    // Updated field name
+	viper.Set("smtp.credentials", config.SMTP.Credentials) // Updated field name
 	viper.Set("default_recipient", config.DefaultRecipient)
+	viper.Set("setup_completed", config.SetupCompleted) // Track setup completion
 
 	// Ensure the directory exists
 	if err := os.MkdirAll(filepath.Dir(configPath), os.ModePerm); err != nil {

@@ -15,27 +15,25 @@ var configCmd = &cobra.Command{
 
 dhanu config --port 465
 dhanu config --host smtp.yahoo.com
-dhanu config --username your_username
-dhanu config --password your_app_password
+dhanu config --from-email your_email@example.com
+dhanu config --credentials your_app_password
 dhanu config --default-recipient my-email@example.com
-dhanu config --username my_username --password my_password --host smtp.gmail.com --port 465 --default-recipient my-email@example.com`,
+dhanu config --from-email my_email@example.com --credentials my_password --host smtp.gmail.com --port 465 --default-recipient my-email@example.com`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		updateConfig(cmd) // Pass the cmd object here
+		updateConfig(cmd)
 	},
 }
 
 func init() {
-
 	rootCmd.AddCommand(configCmd)
 
 	// Define flags for updating configuration
 	configCmd.Flags().IntP("port", "P", 0, "SMTP port")
 	configCmd.Flags().StringP("host", "H", "", "SMTP host")
-	configCmd.Flags().StringP("username", "u", "", "SMTP username")
-	configCmd.Flags().StringP("password", "p", "", "SMTP password")
-	configCmd.Flags().StringP("default-recipient", "d", "", "Default recipient email")
-
+	configCmd.Flags().StringP("from-email", "F", "", "SMTP from_email")
+	configCmd.Flags().StringP("credentials", "C", "", "SMTP credentials (password)")
+	configCmd.Flags().StringP("default-recipient", "D", "", "Default recipient email")
 }
 
 // Function to update the configuration
@@ -47,12 +45,29 @@ func updateConfig(cmd *cobra.Command) {
 		return
 	}
 
-	// Update fields based on flags
-	if username, _ := cmd.Flags().GetString("username"); username != "" {
-		config.SMTP.Username = username
+	// First time setup for credentials
+	if config.SetupCompleted {
+		fmt.Println("Initial setup required. Please provide following details.")
+		fmt.Print("From Email (the email from which the emails will be sent): ")
+		fmt.Scanln(&config.SMTP.FromEmail)
+		fmt.Print("Credential (app password of the above provided email): ")
+		fmt.Scanln(&config.SMTP.Credentials)
+		fmt.Print("Port (the port number which will be use by smtp of the above provided email): ")
+		fmt.Scanln(&config.SMTP.Port)
+		fmt.Print("Host (the host of the above provided email): ")
+		fmt.Scanln(&config.SMTP.Host)
+		fmt.Print("Default recipient (this email address will be used as default reciepient in case no reciepient provided): ")
+		fmt.Scanln(&config.SMTP.Credentials)
+		fmt.Print("Confirm the details above or you want to try again, y or no: ")
+		// put condition here
 	}
-	if password, _ := cmd.Flags().GetString("password"); password != "" {
-		config.SMTP.Password = password
+
+	// Update fields based on flags
+	if fromEmail, _ := cmd.Flags().GetString("from-email"); fromEmail != "" {
+		config.SMTP.FromEmail = fromEmail
+	}
+	if credentials, _ := cmd.Flags().GetString("credentials"); credentials != "" {
+		config.SMTP.Credentials = credentials
 	}
 	if host, _ := cmd.Flags().GetString("host"); host != "" {
 		config.SMTP.Host = host
