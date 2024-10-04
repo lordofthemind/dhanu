@@ -6,7 +6,13 @@
 ├── Readme.md
 ├── Roadmap.md
 ├── Structure.md
-├── bin
+├── build
+│   ├── linux
+│   │   └── dhanu
+│   ├── mac
+│   │   └── dhanu
+│   └── win
+│       └── dhanu.exe
 ├── cmd
 │   ├── config.go
 │   ├── root.go
@@ -26,8 +32,7 @@
 │       ├── LoadSendConfigs.go
 │       └── SaveConfigs.go
 ├── tmp
-│   ├── email.txt
-│   └── main
+│   └── email.txt
 └── tree.txt
 
-12 directories, 19 files
+15 directories, 21 files
