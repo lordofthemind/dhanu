@@ -24,7 +24,16 @@ dhanu config -D, --default-recipient my-email@example.com
 dhanu config -F my_email@example.com -C my_password -H smtp.gmail.com -P 465 -D my-email@example.com`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		updateConfig(cmd)
+		// If no flags provided, show help information
+		if !cmd.Flags().Changed("port") &&
+			!cmd.Flags().Changed("host") &&
+			!cmd.Flags().Changed("from-email") &&
+			!cmd.Flags().Changed("credentials") &&
+			!cmd.Flags().Changed("default-recipient") {
+			cmd.Help()
+		} else {
+			updateConfig(cmd)
+		}
 	},
 }
 
@@ -53,67 +62,9 @@ func updateConfig(cmd *cobra.Command) {
 	// First time setup for credentials
 	if !config.SetupCompleted {
 		fmt.Println("Initial setup required. Please provide the following details:")
-
-		// Prompt for each field and read user input
-		fmt.Print("From Email (the email from which the emails will be sent): ")
-		config.SMTP.FromEmail, _ = reader.ReadString('\n')
-		config.SMTP.FromEmail = strings.TrimSpace(config.SMTP.FromEmail)
-
-		fmt.Print("Credential (the app password of the above-provided email): ")
-		config.SMTP.Credentials, _ = reader.ReadString('\n')
-		config.SMTP.Credentials = strings.TrimSpace(config.SMTP.Credentials)
-
-		fmt.Print("Port (the port number to be used by SMTP for the above email): ")
-		fmt.Scanln(&config.SMTP.Port)
-
-		fmt.Print("Host (the SMTP host for the above-provided email): ")
-		config.SMTP.Host, _ = reader.ReadString('\n')
-		config.SMTP.Host = strings.TrimSpace(config.SMTP.Host)
-
-		fmt.Print("Default Recipient (this email address will be used as the default recipient if none is provided): ")
-		config.DefaultRecipient, _ = reader.ReadString('\n')
-		config.DefaultRecipient = strings.TrimSpace(config.DefaultRecipient)
-
-		// Confirmation prompt
-		for {
-			fmt.Println("\nPlease confirm the details you entered:")
-			fmt.Printf("From Email: %s\n", config.SMTP.FromEmail)
-			fmt.Printf("Credential: %s\n", config.SMTP.Credentials)
-			fmt.Printf("Port: %d\n", config.SMTP.Port)
-			fmt.Printf("Host: %s\n", config.SMTP.Host)
-			fmt.Printf("Default Recipient: %s\n", config.DefaultRecipient)
-			fmt.Print("Are these details correct? (y/n): ")
-
-			confirmation, _ := reader.ReadString('\n')
-			confirmation = strings.TrimSpace(strings.ToLower(confirmation))
-
-			if confirmation == "y" {
-				config.SetupCompleted = true
-				break
-			} else if confirmation == "n" {
-				fmt.Println("Let's re-enter the details.")
-				fmt.Print("From Email: ")
-				config.SMTP.FromEmail, _ = reader.ReadString('\n')
-				config.SMTP.FromEmail = strings.TrimSpace(config.SMTP.FromEmail)
-
-				fmt.Print("Credential: ")
-				config.SMTP.Credentials, _ = reader.ReadString('\n')
-				config.SMTP.Credentials = strings.TrimSpace(config.SMTP.Credentials)
-
-				fmt.Print("Port: ")
-				fmt.Scanln(&config.SMTP.Port)
-
-				fmt.Print("Host: ")
-				config.SMTP.Host, _ = reader.ReadString('\n')
-				config.SMTP.Host = strings.TrimSpace(config.SMTP.Host)
-
-				fmt.Print("Default Recipient: ")
-				config.DefaultRecipient, _ = reader.ReadString('\n')
-				config.DefaultRecipient = strings.TrimSpace(config.DefaultRecipient)
-			} else {
-				fmt.Println("Invalid option. Please type 'y' for yes or 'n' for no.")
-			}
-		}
+		setupInitialConfig(&config, reader)
+	} else {
+		fmt.Println("You are updating an existing configuration.")
 	}
 
 	// Update fields based on flags if provided
@@ -141,4 +92,51 @@ func updateConfig(cmd *cobra.Command) {
 	}
 
 	fmt.Println("Configuration updated successfully.")
+}
+
+// Helper function to handle initial setup
+func setupInitialConfig(config *configs.Config, reader *bufio.Reader) {
+	for {
+		// Prompt for each field and read user input
+		fmt.Print("From Email (the email from which the emails will be sent): ")
+		config.SMTP.FromEmail, _ = reader.ReadString('\n')
+		config.SMTP.FromEmail = strings.TrimSpace(config.SMTP.FromEmail)
+
+		fmt.Print("Credential (the app password of the above-provided email): ")
+		config.SMTP.Credentials, _ = reader.ReadString('\n')
+		config.SMTP.Credentials = strings.TrimSpace(config.SMTP.Credentials)
+
+		fmt.Print("Port (the port number to be used by SMTP for the above email): ")
+		fmt.Scanln(&config.SMTP.Port)
+
+		fmt.Print("Host (the SMTP host for the above-provided email): ")
+		config.SMTP.Host, _ = reader.ReadString('\n')
+		config.SMTP.Host = strings.TrimSpace(config.SMTP.Host)
+
+		fmt.Print("Default Recipient (this email address will be used as the default recipient if none is provided): ")
+		config.DefaultRecipient, _ = reader.ReadString('\n')
+		config.DefaultRecipient = strings.TrimSpace(config.DefaultRecipient)
+
+		// Confirmation prompt
+		if confirmDetails(config, reader) {
+			config.SetupCompleted = true
+			break
+		}
+	}
+}
+
+// Helper function to confirm user details
+func confirmDetails(config *configs.Config, reader *bufio.Reader) bool {
+	fmt.Println("\nPlease confirm the details you entered:")
+	fmt.Printf("From Email: %s\n", config.SMTP.FromEmail)
+	fmt.Printf("Credential: %s\n", config.SMTP.Credentials)
+	fmt.Printf("Port: %d\n", config.SMTP.Port)
+	fmt.Printf("Host: %s\n", config.SMTP.Host)
+	fmt.Printf("Default Recipient: %s\n", config.DefaultRecipient)
+	fmt.Print("Are these details correct? (y/n): ")
+
+	confirmation, _ := reader.ReadString('\n')
+	confirmation = strings.TrimSpace(strings.ToLower(confirmation))
+
+	return confirmation == "y"
 }
