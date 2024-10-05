@@ -19,11 +19,6 @@ var configCmd = &cobra.Command{
 	Long: `Use these commands to update your configuration settings, for example:
 
 dhanu config -S, --show saved configs
-dhanu config -P, --port 465
-dhanu config -H, --host smtp.yahoo.com
-dhanu config -F, --from-email your_email@example.com
-dhanu config -C, --credentials your_app_password
-dhanu config -D, --default-recipient my-email@example.com
 dhanu config -F my_email@example.com -C my_password -H smtp.gmail.com -P 465 -D my-email@example.com`,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -56,13 +51,12 @@ dhanu config -F my_email@example.com -C my_password -H smtp.gmail.com -P 465 -D 
 func init() {
 	rootCmd.AddCommand(configCmd)
 
-	// Define flags for updating configuration
 	configCmd.Flags().IntP("port", "P", 0, "SMTP port")
 	configCmd.Flags().StringP("host", "H", "", "SMTP host")
 	configCmd.Flags().StringP("from-email", "F", "", "SMTP from_email")
-	configCmd.Flags().StringP("credentials", "C", "", "SMTP credentials (password)")
+	configCmd.Flags().BoolP("show", "S", false, "Show saved configuration")
 	configCmd.Flags().StringP("default-recipient", "D", "", "Default recipient email")
-	configCmd.Flags().BoolP("show", "S", false, "Show saved configuration") // Ensure the -S flag is properly registered
+	configCmd.Flags().StringP("credentials", "C", "", "SMTP credentials (app password)")
 }
 
 // Function to display the saved configuration
@@ -157,7 +151,7 @@ func initiateSetup(config *configs.Config, configPath string) {
 		} else if confirmation == "n" {
 			// Re-enter the details if the user chooses 'n'
 			fmt.Println("Let's re-enter the details.")
-			initiateSetup(config, configPath) // Recursively call initiateSetup to re-enter details
+			initiateSetup(config, configPath)
 		} else {
 			fmt.Println("Invalid option. Please type 'y' for yes or 'n' for no.")
 		}
