@@ -9,33 +9,36 @@ import (
 	"strings"
 )
 
-// ZipAndRename takes a folder or file, renames all files by appending ".rename",
-// and then compresses the files into a zip archive.
-func ZipAndRename(src string, destZip string) error {
+// RenameAndZip takes a file or folder, renames all files by appending ".rename",
+// compresses them into a zip file, and returns the path of the created zip file or an error.
+func RenameAndZip(src string) (string, error) {
 	// Check if src is a file or directory
 	fileInfo, err := os.Stat(src)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Rename all files (in case of a directory)
 	if fileInfo.IsDir() {
 		err := renameFilesInDir(src)
 		if err != nil {
-			return fmt.Errorf("failed to rename files: %v", err)
+			return "", fmt.Errorf("failed to rename files: %v", err)
 		}
 	} else {
 		// For a single file, rename it
 		err := renameFile(src)
 		if err != nil {
-			return fmt.Errorf("failed to rename file: %v", err)
+			return "", fmt.Errorf("failed to rename file: %v", err)
 		}
 	}
 
-	// Create a zip file
-	zipFile, err := os.Create(destZip)
+	// Create a zip file name based on the source
+	zipFileName := src + ".zip"
+
+	// Create the zip file
+	zipFile, err := os.Create(zipFileName)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer zipFile.Close()
 
@@ -51,16 +54,16 @@ func ZipAndRename(src string, destZip string) error {
 			return addToZip(zipWriter, path, src)
 		})
 		if err != nil {
-			return err
+			return "", err
 		}
 	} else {
 		err = addToZip(zipWriter, src, filepath.Dir(src))
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
-	return nil
+	return zipFileName, nil
 }
 
 // renameFilesInDir renames all the files in the directory by appending ".rename".
