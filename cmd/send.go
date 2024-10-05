@@ -150,17 +150,49 @@ func sendEmail(cmd *cobra.Command) {
 		config.SMTP.Credentials,
 	)
 
-	// Determine the sending method based on the presence of CC/BCC and attachments
-	if len(cc) == 0 && len(bcc) == 0 {
-		// If no CC or BCC, send email without them
-		if len(finalAttachments) > 0 {
-			err = emailService.SendEmailWithAttachments([]string{to}, subject, body, finalAttachments, false)
+	// Determine how to send the email based on the presence of CC, BCC, and attachments
+	if len(finalAttachments) > 0 {
+		// If there are attachments, send using the appropriate method
+		if len(cc) > 0 || len(bcc) > 0 {
+			// If there are CC or BCC recipients
+			err = emailService.SendEmailWithCCAndBCCAndAttachments(
+				[]string{to},     // To recipients
+				cc,               // CC recipients
+				bcc,              // BCC recipients
+				subject,          // Subject
+				body,             // Body
+				finalAttachments, // Attachments
+				false,            // isHtml flag (set to false for plain text)
+			)
 		} else {
-			err = emailService.SendEmail([]string{to}, subject, body, false)
+			// No CC or BCC, send with attachments only
+			err = emailService.SendEmail(
+				[]string{to}, // To recipients
+				subject,      // Subject
+				body,         // Body
+				false,        // isHtml flag (set to false for plain text)
+			)
 		}
 	} else {
-		// If CC or BCC is provided, use them in the sending method
-		err = emailService.SendEmailWithCCAndBCC([]string{to}, cc, bcc, subject, body, false)
+		// No attachments, send with CC and BCC if provided
+		if len(cc) > 0 || len(bcc) > 0 {
+			err = emailService.SendEmailWithCCAndBCC(
+				[]string{to}, // To recipients
+				cc,           // CC recipients
+				bcc,          // BCC recipients
+				subject,      // Subject
+				body,         // Body
+				false,        // isHtml flag (set to false for plain text)
+			)
+		} else {
+			// Send a simple email without CC, BCC, or attachments
+			err = emailService.SendEmail(
+				[]string{to}, // To recipients
+				subject,      // Subject
+				body,         // Body
+				false,        // isHtml flag (set to false for plain text)
+			)
+		}
 	}
 
 	// Handle sending errors
