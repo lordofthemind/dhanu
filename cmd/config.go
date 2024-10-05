@@ -18,6 +18,7 @@ var configCmd = &cobra.Command{
 	Short: "Update configuration settings",
 	Long: `Use these commands to update your configuration settings, for example:
 
+dhanu config -S, --show saved configs
 dhanu config -P, --port 465
 dhanu config -H, --host smtp.yahoo.com
 dhanu config -F, --from-email your_email@example.com
@@ -30,6 +31,15 @@ dhanu config -F my_email@example.com -C my_password -H smtp.gmail.com -P 465 -D 
 		config, configPath, err := configs.LoadConfig()
 		if err != nil {
 			fmt.Println("Error loading configuration:", err)
+			return
+		}
+
+		// Check if the user passed the -S flag
+		showConfig, _ := cmd.Flags().GetBool("show")
+
+		if showConfig {
+			// Display the saved configuration
+			displayConfig(&config)
 			return
 		}
 
@@ -52,6 +62,18 @@ func init() {
 	configCmd.Flags().StringP("from-email", "F", "", "SMTP from_email")
 	configCmd.Flags().StringP("credentials", "C", "", "SMTP credentials (password)")
 	configCmd.Flags().StringP("default-recipient", "D", "", "Default recipient email")
+	configCmd.Flags().BoolP("show", "S", false, "Show saved configuration") // Added the -S flag
+}
+
+// Function to display the saved configuration
+func displayConfig(config *configs.Config) {
+	fmt.Println("Saved Configuration:")
+	fmt.Printf("From Email: %s\n", config.SMTP.FromEmail)
+	fmt.Printf("Credential: %s\n", config.SMTP.Credentials)
+	fmt.Printf("Port: %d\n", config.SMTP.Port)
+	fmt.Printf("Host: %s\n", config.SMTP.Host)
+	fmt.Printf("Default Recipient: %s\n", config.DefaultRecipient)
+	fmt.Printf("Setup Completed: %v\n", config.SetupCompleted)
 }
 
 // Function to initiate first-time setup
