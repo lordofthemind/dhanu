@@ -1,4 +1,4 @@
-package unzipandrename
+package main
 
 import (
 	"archive/zip"
@@ -9,8 +9,30 @@ import (
 	"strings"
 )
 
-// UnzipAndRename takes a zip file, extracts it, and renames any files with a ".rename" extension by removing that extension.
-func UnzipAndRename(zipFile string, destDir string) error {
+func main() {
+	// Check if a zip file path is provided as an argument
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: unzip <zipfile>")
+		return
+	}
+
+	zipFile := os.Args[1]
+
+	// Call UnzipAndRename to extract and rename the files
+	err := UnzipAndRename(zipFile)
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println("Successfully extracted and renamed files!")
+	}
+}
+
+// UnzipAndRename takes a zip file, extracts it to the same directory as the zip file,
+// and renames any files with a ".rename" extension by removing that extension.
+func UnzipAndRename(zipFile string) error {
+	// Get the directory and name of the zip file (without the extension)
+	destDir := strings.TrimSuffix(zipFile, ".zip")
+
 	// Open the zip file
 	zipReader, err := zip.OpenReader(zipFile)
 	if err != nil {
@@ -20,6 +42,7 @@ func UnzipAndRename(zipFile string, destDir string) error {
 
 	// Iterate through each file in the zip archive
 	for _, file := range zipReader.File {
+		// Create the full file path by combining the destination directory and file name
 		filePath := filepath.Join(destDir, file.Name)
 
 		// Check if it's a directory or file

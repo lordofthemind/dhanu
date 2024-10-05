@@ -6,6 +6,8 @@
 ├── Readme.md
 ├── Roadmap.md
 ├── Structure.md
+├── UnzipAndRename
+│   └── UnzipAndRename.go
 ├── build
 │   ├── linux
 │   │   └── dhanu
@@ -26,6 +28,8 @@
 │   ├── infrastructure
 │   ├── services
 │   └── utils
+│       ├── RenameAndZip.go
+│       └── Validator.go
 ├── main.go
 ├── pkgs
 │   └── configs
@@ -35,4 +39,4 @@
 │   └── email.txt
 └── tree.txt
 
-15 directories, 21 files
+16 directories, 24 files
