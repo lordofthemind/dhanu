@@ -62,7 +62,7 @@ func init() {
 	configCmd.Flags().StringP("from-email", "F", "", "SMTP from_email")
 	configCmd.Flags().StringP("credentials", "C", "", "SMTP credentials (password)")
 	configCmd.Flags().StringP("default-recipient", "D", "", "Default recipient email")
-	configCmd.Flags().BoolP("show", "S", false, "Show saved configuration") // Added the -S flag
+	configCmd.Flags().BoolP("show", "S", false, "Show saved configuration") // Ensure the -S flag is properly registered
 }
 
 // Function to display the saved configuration
@@ -157,53 +157,7 @@ func initiateSetup(config *configs.Config, configPath string) {
 		} else if confirmation == "n" {
 			// Re-enter the details if the user chooses 'n'
 			fmt.Println("Let's re-enter the details.")
-			// Prompt for From Email with validation
-			for {
-				fmt.Print("From Email: ")
-				config.SMTP.FromEmail, _ = reader.ReadString('\n')
-				config.SMTP.FromEmail = strings.TrimSpace(config.SMTP.FromEmail)
-
-				if utils.IsValidEmail(config.SMTP.FromEmail) {
-					break
-				} else {
-					fmt.Println("Invalid email format. Please enter a valid email address.")
-				}
-			}
-
-			fmt.Print("Credential: ")
-			config.SMTP.Credentials, _ = reader.ReadString('\n')
-			config.SMTP.Credentials = strings.TrimSpace(config.SMTP.Credentials)
-
-			for {
-				fmt.Print("Port: ")
-				portInput, _ := reader.ReadString('\n')
-				portInput = strings.TrimSpace(portInput)
-
-				port, err := strconv.Atoi(portInput)
-				if err != nil {
-					fmt.Println("Invalid input. Please enter a numeric value for the port.")
-				} else {
-					config.SMTP.Port = port
-					break
-				}
-			}
-
-			fmt.Print("Host: ")
-			config.SMTP.Host, _ = reader.ReadString('\n')
-			config.SMTP.Host = strings.TrimSpace(config.SMTP.Host)
-
-			// Prompt for Default Recipient with validation
-			for {
-				fmt.Print("Default Recipient: ")
-				config.DefaultRecipient, _ = reader.ReadString('\n')
-				config.DefaultRecipient = strings.TrimSpace(config.DefaultRecipient)
-
-				if utils.IsValidEmail(config.DefaultRecipient) {
-					break
-				} else {
-					fmt.Println("Invalid email format. Please enter a valid email address.")
-				}
-			}
+			initiateSetup(config, configPath) // Recursively call initiateSetup to re-enter details
 		} else {
 			fmt.Println("Invalid option. Please type 'y' for yes or 'n' for no.")
 		}
