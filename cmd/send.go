@@ -1,12 +1,9 @@
 package cmd
 
 import (
-	"archive/zip"
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/lordofthemind/dhanu/internals/utils"
@@ -120,11 +117,10 @@ func sendEmail(cmd *cobra.Command) {
 		}
 
 		if fileInfo.IsDir() {
-			// Zip the folder
-			zipFilePath := fmt.Sprintf("%s.zip", attachment)
-			err := zipFolder(attachment, zipFilePath)
+			// Process the directory using RenameAndZip
+			zipFilePath, err := utils.RenameAndZip(attachment)
 			if err != nil {
-				log.Printf("Error zipping folder: %v\n", err)
+				log.Printf("Error processing folder with RenameAndZip: %v\n", err)
 				return
 			}
 			finalAttachments = append(finalAttachments, zipFilePath)
@@ -166,11 +162,12 @@ func sendEmail(cmd *cobra.Command) {
 			)
 		} else {
 			// No CC or BCC, send with attachments only
-			err = emailService.SendEmail(
-				[]string{to}, // To recipients
-				subject,      // Subject
-				body,         // Body
-				false,        // isHtml flag (set to false for plain text)
+			err = emailService.SendEmailWithAttachments(
+				[]string{to},     // To recipients
+				subject,          // Subject
+				body,             // Body
+				finalAttachments, // Attachments
+				false,            // isHtml flag (set to false for plain text)
 			)
 		}
 	} else {
@@ -202,58 +199,6 @@ func sendEmail(cmd *cobra.Command) {
 	}
 
 	log.Println("Email sent successfully.")
-}
-
-// Zip a folder to a specified destination zip file
-func zipFolder(folderPath string, zipFilePath string) error {
-	zipFile, err := os.Create(zipFilePath)
-	if err != nil {
-		return err
-	}
-	defer zipFile.Close()
-
-	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
-
-	err = filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-
-		// Preserve the folder structure in the zip file
-		header.Name, _ = filepath.Rel(folderPath, path)
-		if info.IsDir() {
-			header.Name += "/"
-		} else {
-			header.Method = zip.Deflate
-		}
-
-		writer, err := zipWriter.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() {
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-			_, err = io.Copy(writer, file)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-
-	return err
 }
 
 // Check the total size of the attachments to ensure it does not exceed the limit
