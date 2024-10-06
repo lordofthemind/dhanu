@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/lordofthemind/dhanu/internals/services"
@@ -31,7 +32,7 @@ func init() {
 	sendCmd.Flags().StringP("subject", "s", "", "Email subject")
 	sendCmd.Flags().StringP("body", "b", "", "Email body text")
 	sendCmd.Flags().StringP("body-file", "f", "", "Path to text file for email body")
-	sendCmd.Flags().StringSliceP("attachments", "a", []string{}, "List of file paths or folders to attach to the email")
+	sendCmd.Flags().StringP("attachments", "a", "", "Comma-separated list of file paths or folders to attach to the email")
 }
 
 func sendEmail(cmd *cobra.Command) {
@@ -91,8 +92,12 @@ func sendEmail(cmd *cobra.Command) {
 		return
 	}
 
-	// Get attachments if any
-	attachments, _ := cmd.Flags().GetStringSlice("attachments")
+	// Get the attachments as a comma-separated string and split into a slice
+	attachmentsStr, _ := cmd.Flags().GetString("attachments")
+	var attachments []string
+	if attachmentsStr != "" {
+		attachments = strings.Split(attachmentsStr, ",")
+	}
 
 	// Initialize the Dhanu email service with configuration values
 	emailService := services.NewDhanuEmailService(
