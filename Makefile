@@ -28,24 +28,11 @@ build_lin: ## Build dhanu application for Linux
 build_mac: ## Build dhanu application for MacOS
 	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/mac/$(APP_NAME) ./main.go
 
-# Build commands for uar
-build_uar_win: ## Build UnzipAndRename.go as "uar" for Windows
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/win/$(UAR_NAME).exe ./UnzipAndRename/UnzipAndRename.go
-
-build_uar_lin: ## Build UnzipAndRename.go as "uar" for Linux
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/linux/$(UAR_NAME) ./UnzipAndRename/UnzipAndRename.go
-
-build_uar_mac: ## Build UnzipAndRename.go as "uar" for MacOS
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/mac/$(UAR_NAME) ./UnzipAndRename/UnzipAndRename.go
-
 # Build dhanu and uar for all platforms
 build: ## Build both dhanu and uar for all platforms and save in the build folder
 	$(MAKE) build_lin
 	$(MAKE) build_win
 	$(MAKE) build_mac
-	$(MAKE) build_uar_lin
-	$(MAKE) build_uar_win
-	$(MAKE) build_uar_mac
 
 # Run the dhanu application
 run: build

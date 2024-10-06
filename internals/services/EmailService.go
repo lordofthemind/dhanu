@@ -10,8 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/lordofthemind/dhanu/internals/utils"
 )
 
 // DhanuEmailService is responsible for handling email sending with various functionalities
@@ -111,15 +109,8 @@ func (es *DhanuEmailService) buildMessage(to []string, subject, body string, isH
 	bodyPart.Write([]byte(body)) // Add the body content.
 
 	// Handle attachments if any.
-	if len(attachments) > 0 {
-		zipFileName := "attachments.zip"
-		zipPath, err := utils.CreateZipFromAttachments(attachments, zipFileName)
-		if err != nil {
-			return "", fmt.Errorf("failed to create zip from attachments: %v", err)
-		}
-
-		// Attach the zip file.
-		err = es.addAttachment(writer, zipPath)
+	for _, attachment := range attachments {
+		err = es.addAttachment(writer, attachment)
 		if err != nil {
 			return "", fmt.Errorf("failed to add attachment: %v", err)
 		}

@@ -3,7 +3,6 @@ module github.com/lordofthemind/dhanu
 go 1.22.3
 
 require (
-	github.com/lordofthemind/mygopher/gophersmtp v0.0.0-20241004190803-2ccf5e57ad9a
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 )

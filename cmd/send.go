@@ -99,6 +99,13 @@ func sendEmail(cmd *cobra.Command) {
 		attachments = strings.Split(attachmentsStr, ",")
 	}
 
+	// Validate the attachments
+	err = utils.HandleAttachments(attachments)
+	if err != nil {
+		log.Fatalf("Error with attachments: %v\n", err)
+		return
+	}
+
 	// Initialize the Dhanu email service with configuration values
 	emailService := services.NewDhanuEmailService(
 		config.SMTP.Host,
