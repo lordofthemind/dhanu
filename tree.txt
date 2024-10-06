@@ -3,18 +3,19 @@
 ├── LICENSE
 ├── Makefile
 ├── Plan.md
-├── Readme.md
+├── Readme2.md
 ├── Roadmap.md
 ├── Structure.md
-├── UnzipAndRename
-│   └── UnzipAndRename.go
 ├── build
 │   ├── linux
-│   │   └── dhanu
+│   │   ├── dhanu
+│   │   └── uar
 │   ├── mac
-│   │   └── dhanu
+│   │   ├── dhanu
+│   │   └── uar
 │   └── win
-│       └── dhanu.exe
+│       ├── dhanu.exe
+│       └── uar.exe
 ├── cmd
 │   ├── config.go
 │   ├── root.go
@@ -25,18 +26,18 @@
 ├── go.mod
 ├── go.sum
 ├── internals
-│   ├── infrastructure
 │   ├── services
+│   │   ├── EmailService.go
+│   │   └── EmailServiceInterface.go
 │   └── utils
-│       ├── RenameAndZip.go
+│       ├── HandleAttachments.go
 │       └── Validator.go
 ├── main.go
 ├── pkgs
-│   └── configs
-│       ├── LoadSendConfigs.go
-│       └── SaveConfigs.go
-├── tmp
-│   └── email.txt
+│   ├── configs
+│   │   ├── LoadSendConfigs.go
+│   │   └── SaveConfigs.go
+│   └── logger
 └── tree.txt
 
-16 directories, 24 files
+14 directories, 27 files
