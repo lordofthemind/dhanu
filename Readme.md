@@ -1,7 +1,3 @@
-Here’s the generated documentation in markdown format based on the structure and code you provided:
-
----
-
 # Dhanu Project Documentation
 
 ## Overview
@@ -209,7 +205,3 @@ Build artifacts will be generated in the `build` directory under respective OS f
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for more details.
-
---- 
-
-That’s the generated markdown documentation for your project! Let me know if you need any further adjustments.
